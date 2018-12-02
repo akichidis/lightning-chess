@@ -17,7 +17,7 @@ Note that Lightning Chess is still under development, the full Cordapp is still 
 ## Implementation iterations
 
 - Basic PoC in which the smart contract verifies digital signatures only. This version assumes no malicious users and time to move is not taken into account. We are currently at this stage.
-- The smart contract is equipped with chess state validation logic (i.e., if a move is valid). If a user signs an invalid move, this can be used as a cryptographic evidence of malicious activity and the the opponent will be able to provide this proof to win the game. Along the same lines, a checkmate is automatically checked by the contract's verify method. 
+- The smart contract is equipped with chess state validation logic (i.e., if a move is valid). If a user signs an invalid move, this can be used as a cryptographic evidence of malicious activity and the opponent will be able to provide this proof to win the game. Along the same lines, a checkmate is automatically checked by the contract's verify method. 
 - Use Oracles for handling disputes on "time to respond".
 
 ## Contributing
