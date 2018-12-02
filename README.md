@@ -4,7 +4,7 @@
 
 # Lightning Chess
 
-Lightning Chess is an open source 2-player chess app for the [Corda](https://corda.net) blockchain, initialy built as a proof of concept to show that Corda can support offline transactions. The approach is similar to the [lightning network](https://lightning.network) suggested for Bitcoin and could theoretically be applied to any turn-based games. In short, two transactions are required to fully store a chess game on ledger, one to create the game and another to declare the winner (or a draw). In the meantime, players make their moves without notarising transactions, but by exchanging digital signatures on each move. The lightning chess protocol ensures that the smart contract will cryptographically verify the validity of the results.
+Lightning Chess is an open source 2-player chess app for the [Corda](https://corda.net) blockchain, initialy built as a proof of concept to show that Corda can support offline transactions. The approach is similar to the [lightning network](https://lightning.network) suggested for Bitcoin and could theoretically be applied to any turn-based games. In short, two transactions are required to fully store a chess game on ledger, one to create the game and another to declare the winner (or a draw). In the meantime, players move pieces without notarising transactions, but by exchanging digital signatures on each move. The lightning chess protocol ensures that the smart contract will cryptographically verify the validity of the results.
 
 Note that Lightning Chess is still under development, the full Cordapp is still not functional and it's not recommended for production use.
 
