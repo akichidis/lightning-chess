@@ -35,12 +35,13 @@ Note that Lightning Chess is still under development, the full Cordapp is still 
 4. Game ends → submit a tx that includes the last two signed moves (or signed acceptance/resignation from the other party) - The main benefit with this approach is you don't need to send all the game move sequence
 5. Smart contract verify logic should be able to identify a winning state, so consuming is possible.
 
-**Idea** sequence of moves can work like a blockchain.
-**Prerequisites** a passive Oracle (SequenceKeeper) is required (it can be a BFT cluster for advanced security/trust, but accurancy in the level of seconds is tricky anyway with leader-based schemes). Note that oracles are only required for disputes on "time to respond" and they don't need to have visibility on the actual game state (moves).
+**Idea:** sequence of moves can work like a blockchain.
+
+**Prerequisites:** a passive Oracle (SequenceKeeper) is required (it can be a BFT cluster for advanced security/trust, but accurancy in the level of seconds is tricky anyway with leader-based schemes). Note that oracles are only required for disputes on "time to respond" and they don't need to have visibility on the actual game state (moves).
 
 **Dispute cases**
  1. Player leaves the game earlier (on purpose or unexpectedly): Request the last signature from SequenceKeeper that the other party has not responded (WIP: time-out policy to be defined).
- 2. Player makes an invalid move: The other player reveals signed previous state(s) and signed current move. Smart contract logic should be able to identify a wrong move and the winner can consume the assets. Chess software should not allow invalid moves, thus an invalid move should only happen on purpose.
+ 2. Player makes an invalid move: The other player reveals signed previous state(s) and signed current move. Smart contract logic should be able to identify a wrong move and the winner can consume the assets. Chess software should only allow valid moves, thus an invalid move can only happen on purpose.
 
 ## Contributing
 
