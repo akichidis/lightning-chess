@@ -9,7 +9,7 @@ Lightning Chess is an open source 2-player chess app for the [Corda](https://cor
 Note that Lightning Chess is still under development, the full Cordapp is still not functional and it's not recommended for production use.
 
 ## Why Corda and not Ethereum?
-Because Corda is more versatile, provides extra privacy and it's actually doable with Corda. Take a look at this interesting experiment where a student project from Technical University of Berlin engaged in making a Chess game for Ethereum; but, they faced challenges and their conclusion was:
+Because Corda is more versatile, provides extra privacy and it's actually doable with Corda. Take a look at this [interesting experiment](https://medium.com/@graycoding/lessons-learned-from-making-a-chess-game-for-ethereum-6917c01178b6) where a student project from Technical University of Berlin engaged in making a Chess game for Ethereum; but, they faced challenges and their conclusion was:
 > The Ethereum virtual machine is turing-complete, but that doesn’t mean that everything should be computed on it. 
 
 ## Features
