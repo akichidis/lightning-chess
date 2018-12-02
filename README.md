@@ -36,8 +36,8 @@ Because Corda is more versatile, provides extra privacy and it's actually doable
    3. SequenceKeeper signs and replies back
    4. player forwards to the other player
    5. next player's turn (go to 3.i)
-4. Game ends → submit a tx that includes the last two signed moves (or signed acceptance/resignation from the other party) - The main benefit with this approach is you don't need to send the full move-sequence.
-5. Smart contract verify logic should be able to identify a winning state, so consuming is possible.
+4. game ends → submit a tx that includes the last two signed moves. For instance, a player provides the signed winning move + the signed previous move of the opponent. Alternatively, a signed acceptance/resignation from the other party or a mutually signed agreement on the result would be enough (this is the 1st iteration). The main benefit with this approach is you don't need to send the full move-sequence and chessboard states, simplifying the contract logic by  large degree.
+5. The aim is that the smart contract verify logic should be able to identify a winning or draw state, so consuming of the potentially encumbered assets (awards) is possible.
 
 **Ideas:** 
 1. sequence of moves can work like a blockchain Vs a counter.
@@ -46,8 +46,8 @@ Because Corda is more versatile, provides extra privacy and it's actually doable
 **Prerequisites:** a passive Oracle (SequenceKeeper) is required (it can be a BFT cluster for advanced security/trust, but accurancy in the level of seconds is tricky anyway with leader-based schemes). Note that oracles are only required for disputes on "time to respond" and they don't need to have visibility on the actual game state (moves).
 
 **Dispute cases**
- 1. Player leaves the game earlier (on purpose or unexpectedly): Request the last signature from SequenceKeeper that the other party has not responded (WIP: time-out policy to be defined).
- 2. Player makes an invalid move: The other player reveals signed previous state(s) and signed current move. Smart contract logic should be able to identify a wrong move and the winner can consume the assets. Chess software should only allow valid moves, thus an invalid move can only happen on purpose.
+ 1. Player leaves the game earlier or refuses to play (on purpose or unexpectedly): Request a signature from SequenceKeeper that the other party has not responded on time (WIP: time-out policy to be defined).
+ 2. Player makes an invalid move: The other player reveals the signed previous state(s) and the signed "malicious" move. Smart contract logic should be able to identify a wrong move and the other party can use this as evidence to win the game. Chess software should only allow valid moves, thus an invalid move can only happen by hacking the game engine.
 
 ## Contributing
 
