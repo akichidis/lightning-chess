@@ -24,18 +24,20 @@ Note that Lightning Chess is still under development, the full Cordapp is still 
 
 **Happy path process**
 
-1. players agree on random gameID and colours (similarly to key agreement)
-2. initial commitment (fact-time lock tx) → send for notarisation
-3. off chain game
+1. players agree on random gameID and colours (similarly to key agreement).
+2. initial commitment (fact-time lock tx) → send for notarisation.
+3. off chain game:
    1. player signs next move
    2. sends hash (or gameID + sequence) to SequenceKeeper
    3. SequenceKeeper signs and replies back
    4. player forwards to the other player
    5. next player's turn (go to 3.i)
-4. Game ends → submit a tx that includes the last two signed moves (or signed acceptance/resignation from the other party) - The main benefit with this approach is you don't need to send all the game move sequence
+4. Game ends → submit a tx that includes the last two signed moves (or signed acceptance/resignation from the other party) - The main benefit with this approach is you don't need to send the full move-sequence.
 5. Smart contract verify logic should be able to identify a winning state, so consuming is possible.
 
-**Idea:** sequence of moves can work like a blockchain.
+**Ideas:** 
+1. sequence of moves can work like a blockchain Vs a counter.
+2. using the encumbrance feature one can create a tournament with real cash prizes.
 
 **Prerequisites:** a passive Oracle (SequenceKeeper) is required (it can be a BFT cluster for advanced security/trust, but accurancy in the level of seconds is tricky anyway with leader-based schemes). Note that oracles are only required for disputes on "time to respond" and they don't need to have visibility on the actual game state (moves).
 
