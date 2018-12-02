@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run Flow Tests" type="JUnit" factoryName="JUnit">
+    <module name="com.template.cordapp.test" />
+    <option name="PACKAGE_NAME" value="com.lightningchess" />
+    <option name="MAIN_CLASS_NAME" value="com.lightningchess.FlowTests" />
+    <option name="METHOD_NAME" value="" />
+    <option name="VM_PARAMETERS" value="-ea -javaagent:lib/quasar.jar" />
+    <option name="PARAMETERS" value="" />
+    <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
