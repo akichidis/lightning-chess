@@ -20,7 +20,7 @@
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a class="navbar-brand" href="#">Lightning Chess<!-- - {{demoApp.thisNode}}--></a>
+            <a class="navbar-brand" href="#">Lightning Chess</a>
         </div>
 		<button ng-click="demoApp.openModal()" type="button" class="btn btn-primary navbar-btn">New Game</button>
 		<button ng-click="" type="button" class="btn disabled btn-primary navbar-btn">Abandon Game</button>
@@ -60,7 +60,9 @@
         {{ modalInstanceTwo.message }}
     </div>
 </script>
-
+<div style="margin:15px">
+    <h4 style="display:inline-block">Your x500 name:</h4> {{demoApp.thisNode}}
+</div>
 <div id="board1" style="width: 400px; margin:auto"></div>
 <br/>
 

@@ -8,18 +8,13 @@ app.config(['$qProvider', function ($qProvider) {
 }]);
 
 app.controller('DemoAppController', function($scope, $http, $location, $uibModal) {
-    const allNodesApiBaseUrls = {"O=PlayerA, L=London, C=GB":"http://localhost:10015/api/",
-                                 "O=PlayerB, L=New York, C=US":"http://localhost:10012/api/"}
-
+    const apiBaseURL = "api/";
     const demoApp = this;
 
-    demoApp.allNodesApiBaseUrls = allNodesApiBaseUrls
-
     // Try to connect first via the PlayerA
-    const apiBaseURL = allNodesApiBaseUrls["O=PlayerA, L=London, C=GB"];
     let peers = [];
 
-    $http.get(apiBaseURL + "me").then((response) => demoApp.thisNode = response.data.me);
+    $http.get(apiBaseURL + "me").then((response) => demoApp.thisNode = response.data.me.x500Principal.name);
 
     $http.get(apiBaseURL + "peers").then((response) => peers = response.data.peers);
 
@@ -44,19 +39,6 @@ app.controller('DemoAppController', function($scope, $http, $location, $uibModal
 
             let player;
             let allRetrievedSignatures = [];
-
-           for (player in allNodesApiBaseUrls) {
-                 $http.get(allNodesApiBaseUrls[player] + "signatures")
-                .then((response) => {
-                                const retrievedSignatures = Object.keys(response.data)
-                                                        .map((key) => response.data[key])
-                                                        .reverse();
-
-                                allRetrievedSignatures = allRetrievedSignatures.concat(retrievedSignatures)
-
-                                demoApp.signatures = allRetrievedSignatures
-                        });
-           }
 
             demoApp.signatures = $scope.user;
     };

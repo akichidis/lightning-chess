@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 /**
  * Define your API endpoints here.
  */
-val SERVICE_NAMES = listOf("Notary", "Network Map Service")
+val SERVICE_NAMES = listOf("Network Map Service")
 
 @RestController
 @RequestMapping("/api")
