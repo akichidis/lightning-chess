@@ -1,10 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Lightning Chess - CordApp</title>
+    <title>Lightning Chess CorDapp</title>
+    <link rel="stylesheet" href="css/chessboard-0.3.0.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.0-rc.1/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.2.0/ui-bootstrap-tpls.min.js"></script>
+    <script src="js/angular-module.js"></script>
 </head>
-<body>
-    <div>Lightning Chess</div>
+<body ng-app="demoAppModule" ng-controller="DemoAppController as demoApp">
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Lightning Chess<!-- - {{demoApp.thisNode}}--></a>
+        </div>
+		<button ng-click="demoApp.openModal()" type="button" class="btn btn-primary navbar-btn">New Game</button>
+		<button ng-click="" type="button" class="btn disabled btn-primary navbar-btn">Abandon Game</button>
+    </div>
+</nav>
+<script type="text/ng-template" id="demoAppModal.html">
+    <div class="modal-header">
+        <h4 class="modal-title">Create new game</h4>
+    </div>
+    <form>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="player" class="control-label">Player:</label>
+                <select ng-model="modalInstance.form.player" class="form-control" id="player"
+                        ng-options="peer as peer for peer in modalInstance.peers">
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="nickname" class="control-label">Your nickname:</label>
+                <input type="text" ng-model="modalInstance.form.nickname" class="form-control" id="nickname">
+            </div>
+            <div ng-show="modalInstance.formError" class="form-group">
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button ng-click="modalInstance.cancel()" type="button" class="btn btn-default">Close</button>
+            <button ng-click="modalInstance.create()" type="button" class="btn btn-primary">Create</button>
+        </div>
+    </form>
+</script>
+<script type="text/ng-template" id="messageContent.html">
+    <div class="modal-body" id="modal-body">
+        {{ modalInstanceTwo.message }}
+    </div>
+</script>
+
+<div id="board1" style="width: 400px; margin:auto"></div>
+<br/>
+
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Signatures Console</h3>
+            </div>
+            <div class="panel-body">No signatures exchagned yet</div>
+        </div>
+        <div ng-repeat="journal in demoApp.journals" class="panel panel-default">
+            <div class="panel-body" style="font-size: 16px;">
+                
+            </div>
+        </div>
+    </div>
+    <div class="col-md-1"></div>
+</div>
+
+<script
+  src="https://code.jquery.com/jquery-2.2.4.min.js"
+  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+  crossorigin="anonymous"></script>
+<script type="text/javascript" src="js/chessboard-0.3.0.min.js"></script>
+<script type="text/javascript">
+	var cfg = {
+	  draggable: true,
+	  dropOffBoard: 'snapback', // this is the default
+	  position: 'start'
+	};
+
+	var board1 = ChessBoard('board1', cfg);
+</script>
+
 </body>
 </html>
