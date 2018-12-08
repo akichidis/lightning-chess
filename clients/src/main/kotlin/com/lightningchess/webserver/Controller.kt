@@ -2,9 +2,9 @@ package com.lightningchess.webserver
 
 import net.corda.core.identity.CordaX500Name
 import org.slf4j.LoggerFactory
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import java.net.URI
 
 /**
  * Define your API endpoints here.
@@ -36,5 +36,21 @@ class Controller(rpc: NodeRPCConnection) {
                 .map { it.legalIdentities.first().name }
                 //filter out myself, notary and eventual network map started by driver
                 .filter { it.organisation !in (SERVICE_NAMES + myLegalName.organisation) })
+    }
+
+    @PostMapping(value = "/create-game", produces = arrayOf("application/json"))
+    fun createGame(@RequestBody gameRequest: NewGameRequest): ResponseEntity<NewGameRequest> {
+        print(gameRequest)
+
+        return try {
+            //val signedTx = proxy.startTrackedFlow(::IssueJournalStateFlow, ).returnValue.getOrThrow()
+
+            //"Transaction id ${signedTx.id}
+
+            return ResponseEntity.created(URI("")).body(gameRequest)
+        } catch (ex: Throwable) {
+            logger.error(ex.message, ex)
+            return ResponseEntity.badRequest().build()
+        }
     }
 }

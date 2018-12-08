@@ -60,12 +60,23 @@ app.controller('ModalInstanceCtrl', function ($http, $location, $uibModalInstanc
 
             $uibModalInstance.close();
 
-            const nodeBaseApiUrl = demoApp.allNodesApiBaseUrls[modalInstance.form.player];
+            const createGameEndpoint = `${apiBaseURL}create-game`;
 
-            const createGameEndpoint = `${nodeBaseApiUrl}create-game?&nickname=${modalInstance.form.nickname}`;
+            //opponentX500Name=${modalInstance.form.player}&userNickname=${modalInstance.form.nickname}
+
+            /*
+            const data = $.param({
+                JSON.stringify({
+                    opponentX500Name: modalInstance.form.player,
+                    userNickname: modalInstance.form.nickname
+                })
+            })
+            */
+
+            const data = { opponentX500Name: modalInstance.form.player, userNickname: modalInstance.form.nickname }
 
             // Create PO and handle success / fail responses.
-            $http.post(createGameEndpoint).then(
+            $http.post(createGameEndpoint, data).then(
                 (result) => {
                     modalInstance.displayMessage(result);
                 },

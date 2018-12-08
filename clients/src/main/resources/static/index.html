@@ -33,9 +33,9 @@
     <form>
         <div class="modal-body">
             <div class="form-group">
-                <label for="player" class="control-label">Player:</label>
-                <select ng-model="modalInstance.form.player" class="form-control" id="player"
-                        ng-options="peer as peer for peer in modalInstance.peers">
+                <label for="player" class="control-label">Pick your opponent:</label>
+                <select ng-model="modalInstance.form.player" class="form-control" id="player">
+                    <option ng-repeat="peer in modalInstance.peers" value="{{peer.x500Principal.name}}">{{peer.x500Principal.name}}</option>
                 </select>
             </div>
             <div class="form-group">
