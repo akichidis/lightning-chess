@@ -1,116 +1,64 @@
 "use strict";
 
-const app = angular.module('demoAppModule', ['ui.bootstrap']);
+$(document).ready(function() {
+    var apiBaseURL = "http://localhost:10015/api/";
+    var peers = new Array();
 
-// Fix for unhandled rejections bug.
-app.config(['$qProvider', function ($qProvider) {
-    $qProvider.errorOnUnhandledRejections(false);
-}]);
+    $('#createGameModal').modal({show: false});
 
-app.controller('DemoAppController', function($scope, $http, $location, $uibModal) {
-    const apiBaseURL = "api/";
-    const demoApp = this;
+    $("#newGameBtn").click(function() {
+        //render opponents options
+        $("#opponents option").remove();
 
-    // Try to connect first via the PlayerA
-    let peers = [];
+        $.each(peers, function(i, item) {
+            $("#opponents").append($('<option>', {
+                value: item.x500Principal.name,
+                text: item.x500Principal.name
+            }));
+        });
 
-    $http.get(apiBaseURL + "me").then((response) => demoApp.thisNode = response.data.me.x500Principal.name);
+        $('#createGameModal').modal('show');
+    });
 
-    $http.get(apiBaseURL + "peers").then((response) => peers = response.data.peers);
+    $("#abandonGameBtn").click(function() {
+    });
 
-    demoApp.openModal = () => {
-        const modalInstance = $uibModal.open({
-            templateUrl: 'demoAppModal.html',
-            controller: 'ModalInstanceCtrl',
-            controllerAs: 'modalInstance',
-            resolve: {
-                demoApp: () => demoApp,
-                apiBaseURL: () => apiBaseURL,
-                peers: () => peers
+
+    $("#modalCreateGameBtn").click(function() {
+        var opponentX500Name = $("#opponents").val();
+        var nickname = $("#nickname").val();
+
+        var createGameEndpoint = apiBaseURL + "create-game";
+
+        var postData = { "opponentX500Name": opponentX500Name, "userNickname": nickname }
+
+        $.ajax({
+            url: createGameEndpoint,
+            type: 'post',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(postData),
+            success: function(data) {
+                console.log(data);
             }
         });
+    });
 
-        modalInstance.result.then(() => {}, () => {});
-    };
+    var retrieveNickname = function() {
+        $.get(apiBaseURL + "me", function(data) {
+            var myName = data.me.x500Principal.name;
 
-    demoApp.signatures = [];
-
-    demoApp.getSignatures = () => {
-
-            let player;
-            let allRetrievedSignatures = [];
-
-            demoApp.signatures = $scope.user;
-    };
-
-});
-
-app.controller('ModalInstanceCtrl', function ($http, $location, $uibModalInstance, $uibModal, demoApp, apiBaseURL, peers) {
-    const modalInstance = this;
-
-    modalInstance.peers = peers;
-    modalInstance.form = {};
-    modalInstance.formError = false;
-
-    modalInstance.create = () => {
-        if (invalidFormInput()) {
-            modalInstance.formError = true;
-        } else {
-            modalInstance.formError = false;
-
-            $uibModalInstance.close();
-
-            const createGameEndpoint = `${apiBaseURL}create-game`;
-
-            //opponentX500Name=${modalInstance.form.player}&userNickname=${modalInstance.form.nickname}
-
-            /*
-            const data = $.param({
-                JSON.stringify({
-                    opponentX500Name: modalInstance.form.player,
-                    userNickname: modalInstance.form.nickname
-                })
-            })
-            */
-
-            const data = { opponentX500Name: modalInstance.form.player, userNickname: modalInstance.form.nickname }
-
-            // Create PO and handle success / fail responses.
-            $http.post(createGameEndpoint, data).then(
-                (result) => {
-                    modalInstance.displayMessage(result);
-                },
-                (result) => {
-                    modalInstance.displayMessage(result);
-                }
-            );
-        }
-    };
-
-    modalInstance.displayMessage = (message) => {
-        const modalInstanceTwo = $uibModal.open({
-            templateUrl: 'messageContent.html',
-            controller: 'messageCtrl',
-            controllerAs: 'modalInstanceTwo',
-            resolve: { message: () => message }
+            $("#myNickname").html(myName);
         });
-
-        // No behaviour on close / dismiss.
-        modalInstanceTwo.result.then(() => {}, () => {});
     };
 
-    // Close create IOU modal dialogue.
-    modalInstance.cancel = () => $uibModalInstance.dismiss();
-
-    // Validate the IOU.
-    function invalidFormInput() {
-        return false;
-        //return isNaN(modalInstance.form.value) || (modalInstance.form.counterparty === undefined);
+    var retrievePeers = function() {
+        $.get(apiBaseURL + "peers", function(data) {
+            peers = data.peers;
+            console.log(peers);
+        });
     }
-});
 
-// Controller for success/fail modal dialogue.
-app.controller('messageCtrl', function ($uibModalInstance, message) {
-    const modalInstanceTwo = this;
-    modalInstanceTwo.message = message.data;
+    retrieveNickname();
+    retrievePeers();
 });

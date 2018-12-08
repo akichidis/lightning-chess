@@ -12,6 +12,7 @@ import java.net.URI
 val SERVICE_NAMES = listOf("Network Map Service")
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 class Controller(rpc: NodeRPCConnection) {
 
