@@ -35,9 +35,9 @@
                         <label for="nickname" class="control-label">Your nickname:</label>
                         <input type="text" class="form-control" id="nickname">
                     </div>
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
+                    <div id="createGameErrorAlert" class="alert alert-danger alert-dismissible hide" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <strong>Warning!</strong> <span class="alertText"></span>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -45,6 +45,15 @@
                     <button id="modalCreateGameBtn" type="button" class="btn btn-primary">Create</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+<div id="messagePopup" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <label id="messagePopupText" class="control-label text"></label>
+            </div>
         </div>
     </div>
 </div>
@@ -61,11 +70,14 @@
             <div class="panel-heading">
                 <h3 class="panel-title">Signatures Console</h3>
             </div>
-            <div class="panel-body">No signatures exchagned yet</div>
+            <div class="panel-body">
+                <select id="signaturesPanel" multiple="yes" style="width: 100%">
+                    <option></option>
+                </select>
+            </div>
         </div>
         <div class="panel panel-default">
             <div class="panel-body" style="font-size: 16px;">
-                
             </div>
         </div>
     </div>
