@@ -60,7 +60,8 @@
 <div style="margin:15px">
     <h4 style="display:inline-block">Your x500 name:</h4><label id="myNickname"></label>
 </div>
-<div id="board1" style="width: 400px; margin:auto"></div>
+
+<div id="chessBoard" style="width: 400px; margin:auto"></div>
 <br/>
 
 <div class="row">
@@ -72,7 +73,6 @@
             </div>
             <div class="panel-body">
                 <select id="signaturesPanel" multiple="yes" style="width: 100%">
-                    <option></option>
                 </select>
             </div>
         </div>
@@ -82,17 +82,9 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
         integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
         crossorigin="anonymous"></script>
-<script src="js/angular-module.js"></script>
+<script type="text/javascript" src="js/chess-board-setup.js"></script>
+<script type="text/javascript" src="js/chess.js"></script>
 <script type="text/javascript" src="js/chessboard-0.3.0.min.js"></script>
-<script type="text/javascript">
-	var cfg = {
-	  draggable: true,
-	  dropOffBoard: 'snapback', // this is the default
-	  position: 'start'
-	};
-
-	var board1 = ChessBoard('board1', cfg);
-</script>
-
+<script type="text/javascript" src="js/main.js"></script>
 </body>
 </html>

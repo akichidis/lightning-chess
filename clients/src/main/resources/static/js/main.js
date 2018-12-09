@@ -54,6 +54,9 @@ $(document).ready(function() {
                 messagePopup.modal('show');
 
                 signaturesConsole.find("option").remove();
+
+                //Setup chessboard in start position
+                board.start();
             },
             error: function(data) {
                 createGamePopupErrorAlert.find(".alertText").html(JSON.stringify(data));
@@ -87,12 +90,13 @@ $(document).ready(function() {
     }
 
     var appendToSignaturesConsole = function(signature) {
-        signaturesConsole.append($('<option>', {
+        signaturesConsole.prepend($('<option>', {
                         value: signature,
-                        text: signature
+                        text: new Date() + " - " + signature
                     }));
     }
 
     retrieveNickname();
     retrievePeers();
+    setupChessBoard(appendToSignaturesConsole);
 });
