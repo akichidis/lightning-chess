@@ -1,10 +1,98 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Lightning Chess - CordApp</title>
+    <title>Lightning Chess CorDapp</title>
+    <link rel="stylesheet" href="css/chessboard-0.3.0.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 </head>
-<body>
-    <div>Lightning Chess</div>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Lightning Chess</a>
+        </div>
+		<button id="newGameBtn" type="button" class="btn btn-primary navbar-btn">New Game</button>
+		<button id="abandonGameBtn" type="button" class="btn disabled btn-primary navbar-btn">Abandon Game</button>
+    </div>
+</nav>
+<div id="createGameModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Create new game</h4>
+            </div>
+            <form>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="opponents" class="control-label">Pick your opponent:</label>
+                        <select class="form-control" id="opponents">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nickname" class="control-label">Your nickname:</label>
+                        <input type="text" class="form-control" id="nickname">
+                    </div>
+                    <div id="createGameErrorAlert" class="alert alert-danger alert-dismissible hide" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <strong>Warning!</strong> <span class="alertText"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button id="modalCreateGameBtn" type="button" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="messagePopup" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <label id="messagePopupText" class="control-label text"></label>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="margin:15px">
+    <h4 style="display:inline-block">Your x500 name:</h4><label id="myNickname"></label>
+</div>
+<div id="board1" style="width: 400px; margin:auto"></div>
+<br/>
+
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Signatures Console</h3>
+            </div>
+            <div class="panel-body">
+                <select id="signaturesPanel" multiple="yes" style="width: 100%">
+                    <option></option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+<script src="js/angular-module.js"></script>
+<script type="text/javascript" src="js/chessboard-0.3.0.min.js"></script>
+<script type="text/javascript">
+	var cfg = {
+	  draggable: true,
+	  dropOffBoard: 'snapback', // this is the default
+	  position: 'start'
+	};
+
+	var board1 = ChessBoard('board1', cfg);
+</script>
+
 </body>
 </html>
