@@ -58,9 +58,18 @@
     </div>
 </div>
 <div style="margin:15px">
-    <h4 style="display:inline-block">Your x500 name:</h4><label id="myNickname"></label>
+    <h5 style="display:inline-block">You: </h5><span id="myNickname"></span>
+    <br/>
+    <h5 style="display:inline-block">Your opponent: </h5><span id="opponentNickname"></span>
 </div>
-<div id="board1" style="width: 400px; margin:auto"></div>
+
+<div id="centralAreaDiv" style="display: table;margin:auto;border-collapse: separate;border-spacing: 10px;">
+    <div id="userTurnPanelDiv" style="width: 200px;height: 100%;display: table-cell; padding: 5px; vertical-align: top; font-size: 1.4em;
+     border-style: dotted; border-width: 2px;padding:5px;">
+        No game created yet
+    </div>
+    <div id="chessBoard" style="display: table-cell; width: 400px; margin:auto"></div>
+</div>
 <br/>
 
 <div class="row">
@@ -72,7 +81,6 @@
             </div>
             <div class="panel-body">
                 <select id="signaturesPanel" multiple="yes" style="width: 100%">
-                    <option></option>
                 </select>
             </div>
         </div>
@@ -82,17 +90,9 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
         integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
         crossorigin="anonymous"></script>
-<script src="js/angular-module.js"></script>
+<script type="text/javascript" src="js/chess-board-setup.js"></script>
+<script type="text/javascript" src="js/chess.js"></script>
 <script type="text/javascript" src="js/chessboard-0.3.0.min.js"></script>
-<script type="text/javascript">
-	var cfg = {
-	  draggable: true,
-	  dropOffBoard: 'snapback', // this is the default
-	  position: 'start'
-	};
-
-	var board1 = ChessBoard('board1', cfg);
-</script>
-
+<script type="text/javascript" src="js/main.js"></script>
 </body>
 </html>
