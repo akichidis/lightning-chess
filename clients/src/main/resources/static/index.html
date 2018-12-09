@@ -58,10 +58,18 @@
     </div>
 </div>
 <div style="margin:15px">
-    <h4 style="display:inline-block">Your x500 name:</h4><label id="myNickname"></label>
+    <h5 style="display:inline-block">You: </h5><span id="myNickname"></span>
+    <br/>
+    <h5 style="display:inline-block">Your opponent: </h5><span id="opponentNickname"></span>
 </div>
 
-<div id="chessBoard" style="width: 400px; margin:auto"></div>
+<div id="centralAreaDiv" style="display: table;margin:auto;border-collapse: separate;border-spacing: 10px;">
+    <div id="userTurnPanelDiv" style="width: 200px;height: 100%;display: table-cell; padding: 5px; vertical-align: top; font-size: 1.4em;
+     border-style: dotted; border-width: 2px;padding:5px;">
+        No game created yet
+    </div>
+    <div id="chessBoard" style="display: table-cell; width: 400px; margin:auto"></div>
+</div>
 <br/>
 
 <div class="row">
