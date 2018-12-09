@@ -44,6 +44,8 @@ Because Corda is more versatile, provides extra privacy and it's actually doable
 **Ideas:** 
 1. sequence of moves can work like a blockchain Vs a counter.
 2. using the encumbrance feature one can create a tournament with real cash prizes.
+3. we could use hash commitments to avoid full signature verification when both parties are honest. Briefly, during game creation, each user can provide a commitment to a hash pre-image, which will be revealed if this user loses the game. Thus, the winner can use it as a cryptographic evidence to win the game. The same process can be applied if a game ends in a draw.
+4. extend the above hash commitment scheme using hash-based post-quantum signatures, such as the Lamport, WOTS, BPQS, XMSS and Sphincs schemes. We also realised that chess in particular is a great example for short hash-based signatures per move (more details in an upcoming scientific paper).
 
 **Prerequisites:** a passive Oracle (SequenceKeeper) is required (it can be a BFT cluster for advanced security/trust, but accurancy in the level of seconds is tricky anyway with leader-based schemes). Note that oracles are only required for disputes on "time to respond" and they don't need to have visibility on the actual game state (moves).
 
