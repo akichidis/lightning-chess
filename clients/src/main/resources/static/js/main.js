@@ -12,7 +12,8 @@ $(document).ready(function() {
 
     var apiBaseURL = "http://localhost:10015/api/";
     var peers = new Array();
-    var myName;
+    var myName, me;
+    var meX500;
 
     $('#createGameModal').modal({show: false});
     $('#messagePopup').modal({show: false});
@@ -23,7 +24,7 @@ $(document).ready(function() {
 
         $.each(peers, function(i, item) {
             $("#opponents").append($('<option>', {
-                value: item.x500Principal.name,
+                value: JSON.stringify(item),
                 text: item.x500Principal.name
             }));
         });
@@ -38,7 +39,7 @@ $(document).ready(function() {
     $("#modalCreateGameBtn").click(function() {
         $("#createGameErrorAlert .alertText").html("");
 
-        var opponentX500Name = $("#opponents").val();
+        var opponentX500Name = JSON.parse($("#opponents").val());
         var nickname = $("#nickname").val();
 
         var createGameEndpoint = apiBaseURL + "create-game";
@@ -55,7 +56,7 @@ $(document).ready(function() {
                 console.log(data);
 
                 $("#myNickname").html(myName + " (" + nickname + ")");
-                $("#opponentNickname").html(opponentX500Name);
+                $("#opponentNickname").html(opponentX500Name.x500Principal.name);
 
                 $("#createGameModal").modal('hide');
 
@@ -69,6 +70,8 @@ $(document).ready(function() {
 
                 //Set user's status message
                 printUserMessage(USER_MESSAGE_STATE_USER_TURN);
+
+                appendToSignaturesConsole("New game started. Signed tx id: " + data.transactionId);
             },
             error: function(data) {
                 createGamePopupErrorAlert.find(".alertText").html(JSON.stringify(data));
@@ -102,7 +105,8 @@ $(document).ready(function() {
 
     var retrieveNickname = function() {
         $.get(apiBaseURL + "me", function(data) {
-            myName = data.me.x500Principal.name;
+            me = data.me
+            myName = me.x500Principal.name;
 
             $("#myNickname").html(myName);
         });
@@ -118,7 +122,7 @@ $(document).ready(function() {
     var appendToSignaturesConsole = function(signature) {
         signaturesConsole.prepend($('<option>', {
                         value: signature,
-                        text: new Date() + " - " + signature
+                        text: new Date().toUTCString() + " - " + signature
                     }));
     }
 
