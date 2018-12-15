@@ -60,7 +60,7 @@ object CreateGameFlow {
             val session = initiateFlow(opponent)
 
             //Creating the output state
-            var gameState = GameState(UUID.randomUUID(), playerANickname, me, opponent)
+            val gameState = GameState(UUID.randomUUID(), playerANickname, me, opponent)
 
             val txCommand = Command(GameContract.Commands.Create(), gameState.participants.map { it.owningKey })
             val txBuilder = TransactionBuilder(notary)

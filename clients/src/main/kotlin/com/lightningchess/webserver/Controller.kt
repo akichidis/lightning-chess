@@ -15,7 +15,7 @@ import java.util.*
 /**
  * Define your API endpoints here.
  */
-val SERVICE_NAMES = listOf("Network Map Service")
+val SERVICE_NAMES = listOf("Notary", "Network Map Service")
 
 @RestController
 @CrossOrigin

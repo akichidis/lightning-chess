@@ -60,7 +60,10 @@ $(document).ready(function() {
 
                 $("#createGameModal").modal('hide');
 
-                messagePopup.find(".text").html(JSON.stringify(data));
+                messagePopup.find(".text")
+                            .addClass("center")
+                            .html('<h4>Game created successfully!</h4><br/>Game ID: ' + data.gameId);
+
                 messagePopup.modal('show');
 
                 signaturesConsole.find("option").remove();
