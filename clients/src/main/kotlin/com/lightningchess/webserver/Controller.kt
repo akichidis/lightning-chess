@@ -1,10 +1,10 @@
 package com.lightningchess.webserver
 
 import com.lightningchess.flow.CreateGameFlow.Initiator
+import com.lightningchess.flow.GameMove
+import com.lightningchess.flow.SignAndSendMoveFlow.Sign
 import com.lightningchess.state.GameState
-import com.lightningchess.webserver.dto.CreateGameResponse
-import com.lightningchess.webserver.dto.NewGameRequest
-import com.lightningchess.webserver.dto.RetrieveGamesResponse
+import com.lightningchess.webserver.dto.*
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.messaging.startTrackedFlow
 import net.corda.core.messaging.vaultQueryBy
@@ -90,6 +90,20 @@ class Controller(rpc: NodeRPCConnection) {
                 sorting = Sort(setOf(Sort.SortColumn(sortByRecordedTime, Sort.Direction.DESC)))).states
 
         return ResponseEntity.ok(RetrieveGamesResponse(gameStates))
+    }
+
+    @PostMapping(value = "/sign-game", produces = arrayOf("application/json"))
+    fun signGameMove(@RequestBody signGameMoveRequest: SignGameMoveRequest): ResponseEntity<SignGameMoveResponse> {
+        val opponent = proxy.wellKnownPartyFromX500Name(signGameMoveRequest.opponentX500Name) ?:
+        return ResponseEntity.badRequest().build()
+
+        val gameMove = GameMove(signGameMoveRequest.gameId, signGameMoveRequest.index, signGameMoveRequest.fen,
+                signGameMoveRequest.move, signGameMoveRequest.previousSignature)
+
+        // Sign the move & Initiate the flow and send it to the opponent
+        val signedGameMove = proxy.startTrackedFlow(::Sign, gameMove, opponent).returnValue.getOrThrow()
+
+        return ResponseEntity.created(URI("")).body(SignGameMoveResponse(signedGameMove.signature))
     }
 
     private fun retrieveGameId(signedTx: SignedTransaction): UUID {

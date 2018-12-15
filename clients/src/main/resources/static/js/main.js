@@ -162,6 +162,11 @@ $(document).ready(function() {
             $.get(retrieveGamesEndpoint, function(data) {
                 var latestGameObj = data.gameStates[0];
 
+                if (latestGameObj == null) {
+                    pollForNewGames();
+                    return;
+                }
+
                 var game = new Game(latestGameObj.state.data.gameId,
                                     latestGameObj.ref.txhash,
                                     latestGameObj.state.data.playerANickname,
@@ -205,13 +210,10 @@ $(document).ready(function() {
      */
     var onGameMove = function(move, fenString) {
         // Mark the current move, sign & send to opponent
-        CURRENT_GAME.movePlayed(move);
+        CURRENT_GAME.movePlayed(move, fenString);
 
         // Update the message on UI
         printUserMessage(CURRENT_GAME.isMyTurn ? USER_MESSAGE_STATE_USER_TURN : USER_MESSAGE_STATE_OPPONENT_TURN);
-
-        // write to console
-        appendToSignaturesConsole(fenString);
     }
 
 
@@ -226,22 +228,52 @@ $(document).ready(function() {
     initChessBoard('white');
 
     pollForNewGames();
-});
 
 
-function Game(id, transactionId, opponentNickname, playerA_X500Name, playerB_X500Name, isOrganiser) {
-    this.id = id;
-    this.transactionId = transactionId;
-    this.opponentNickname = opponentNickname;
-    this.playerA_X500Name = playerA_X500Name;
-    this.playerB_X500Name = playerB_X500Name;
-    this.isOrganiser = isOrganiser;
-    this.isMyTurn = isOrganiser;
-    this.moveIndex = 0;
 
-    this.movePlayed = function(move) {
-        this.isMyTurn = !this.isMyTurn;
+    function Game(id, transactionId, opponentNickname, playerA_X500Name, playerB_X500Name, isOrganiser) {
+        this.id = id;
+        this.transactionId = transactionId;
+        this.opponentNickname = opponentNickname;
+        this.playerA_X500Name = playerA_X500Name;
+        this.playerB_X500Name = playerB_X500Name;
+        this.isOrganiser = isOrganiser;
+        this.isMyTurn = isOrganiser;
+        this.moveIndex = 0;
 
-        CHESS_MOVE_ENABLED = this.isMyTurn;
+        this.movePlayed = function(move, fenString) {
+            console.log(move);
+            this.isMyTurn = !this.isMyTurn;
+
+            // increment the series index
+            this.moveIndex += 1;
+
+            var signGameMove = apiBaseURL + "sign-game";
+
+            var postData = { "gameId": this.id,
+                             "opponentX500Name": isOrganiser ? playerB_X500Name : playerA_X500Name,
+                             "index": this.moveIndex,
+                             "fen": fenString,
+                             "move": JSON.stringify(move) }
+
+            $.ajax({
+                url: signGameMove,
+                type: 'post',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(postData),
+                success: function(data) {
+                    console.log(data);
+
+                    // write to console
+                    appendToSignaturesConsole("Move: " + JSON.stringify(move) + " - signature: " + JSON.stringify(data.signature));
+
+                 },
+                error: function(data) {
+                }
+            });
+
+            CHESS_MOVE_ENABLED = this.isMyTurn;
+        }
     }
-}
+});
