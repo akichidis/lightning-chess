@@ -1,15 +1,21 @@
 package com.lightningchess.webserver
 
+import com.lightningchess.flow.CreateGameFlow.Initiator
+import com.lightningchess.state.GameState
 import net.corda.core.identity.CordaX500Name
+import net.corda.core.messaging.startTrackedFlow
+import net.corda.core.transactions.SignedTransaction
+import net.corda.core.utilities.getOrThrow
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
+import java.util.*
 
 /**
  * Define your API endpoints here.
  */
-val SERVICE_NAMES = listOf("Network Map Service")
+val SERVICE_NAMES = listOf("Notary", "Network Map Service")
 
 @RestController
 @CrossOrigin
@@ -39,19 +45,31 @@ class Controller(rpc: NodeRPCConnection) {
                 .filter { it.organisation !in (SERVICE_NAMES + myLegalName.organisation) })
     }
 
+    /**
+     * Creates a new game by providing the opponent's X500 name. If the opponent (node) is up and running and sign the
+     * contract, then the game will be considered as started.
+     */
     @PostMapping(value = "/create-game", produces = arrayOf("application/json"))
-    fun createGame(@RequestBody gameRequest: NewGameRequest): ResponseEntity<NewGameRequest> {
+    fun createGame(@RequestBody gameRequest: NewGameRequest): ResponseEntity<CreateGameResponse> {
         print(gameRequest)
 
+        val opponent = proxy.wellKnownPartyFromX500Name(gameRequest.opponentX500Name) ?:
+        return ResponseEntity.badRequest().build()
+
         return try {
-            //val signedTx = proxy.startTrackedFlow(::IssueJournalStateFlow, ).returnValue.getOrThrow()
+            val signedTx = proxy.startTrackedFlow(::Initiator, gameRequest.userNickname, opponent).returnValue.getOrThrow()
 
-            //"Transaction id ${signedTx.id}
-
-            return ResponseEntity.created(URI("")).body(gameRequest)
+            return ResponseEntity.created(URI(""))
+                    .body(CreateGameResponse(signedTx.id.toString(), retrieveGameId(signedTx)))
         } catch (ex: Throwable) {
             logger.error(ex.message, ex)
             return ResponseEntity.badRequest().build()
         }
+    }
+
+    private fun retrieveGameId(signedTx: SignedTransaction): UUID {
+        val gameState = signedTx.coreTransaction.outputsOfType<GameState>().first()
+
+        return gameState.gameId
     }
 }
