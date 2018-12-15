@@ -4,6 +4,10 @@ var USER_MESSAGE_STATE_GAME_NOT_CREATED = 0;
 var USER_MESSAGE_STATE_USER_TURN = 1;
 var USER_MESSAGE_STATE_OPPONENT_TURN = 2;
 
+var CURRENT_GAME;
+
+var REJECTED_GAME_IDS = new Set();
+
 $(document).ready(function() {
     var signaturesConsole = $("#signaturesPanel");
     var messagePopup = $('#messagePopup');
@@ -17,15 +21,16 @@ $(document).ready(function() {
 
     $('#createGameModal').modal({show: false});
     $('#messagePopup').modal({show: false});
+    $('#newChallengeGameModal').modal({show: false});
 
     $("#newGameBtn").click(function() {
         //render opponents options
         $("#opponents option").remove();
 
-        $.each(peers, function(i, item) {
+        $.each(peers, function(i, X500Name) {
             $("#opponents").append($('<option>', {
-                value: JSON.stringify(item),
-                text: item.x500Principal.name
+                value: X500Name,
+                text: X500Name
             }));
         });
 
@@ -35,11 +40,10 @@ $(document).ready(function() {
     $("#abandonGameBtn").click(function() {
     });
 
-
     $("#modalCreateGameBtn").click(function() {
         $("#createGameErrorAlert .alertText").html("");
 
-        var opponentX500Name = JSON.parse($("#opponents").val());
+        var opponentX500Name = $("#opponents").val();
         var nickname = $("#nickname").val();
 
         var createGameEndpoint = apiBaseURL + "create-game";
@@ -56,9 +60,12 @@ $(document).ready(function() {
                 console.log(data);
 
                 $("#myNickname").html(myName + " (" + nickname + ")");
-                $("#opponentNickname").html(opponentX500Name.x500Principal.name);
+                $("#opponentNickname").html(opponentX500Name);
 
                 $("#createGameModal").modal('hide');
+
+                // The new game is stored on the global variable
+                CURRENT_GAME = new Game(data.gameId, data.transactionId, "", myName, opponentX500Name, true);
 
                 messagePopup.find(".text")
                             .addClass("center")
@@ -66,15 +73,8 @@ $(document).ready(function() {
 
                 messagePopup.modal('show');
 
-                signaturesConsole.find("option").remove();
-
-                //Setup chessboard in start position
-                board.start();
-
-                //Set user's status message
-                printUserMessage(USER_MESSAGE_STATE_USER_TURN);
-
-                appendToSignaturesConsole("New game started. Signed tx id: " + data.transactionId);
+                // This essentially "starts" the game
+                setupNewGame(CURRENT_GAME);
             },
             error: function(data) {
                 createGamePopupErrorAlert.find(".alertText").html(JSON.stringify(data));
@@ -90,10 +90,14 @@ $(document).ready(function() {
                 userMessagesPanel.html("No game created yet");
                 break;
             case USER_MESSAGE_STATE_USER_TURN:
-                userMessagesPanel.html("<b>White plays:</b><br/> It's your turn!");
+                var userColor = CURRENT_GAME.isOrganiser ? 'White' : 'Black';
+
+                userMessagesPanel.html("<b>" + userColor + " plays:</b><br/> It's your turn!");
                 break;
             case USER_MESSAGE_STATE_OPPONENT_TURN:
-                userMessagesPanel.html("<b>Black plays:</b><br/> Waiting for opponent's move...");
+                var opponentColor = CURRENT_GAME.isOrganiser ? 'Black' : 'White';
+
+                userMessagesPanel.html("<b>" + opponentColor + " plays:</b><br/> Waiting for opponent's move...");
                 break;
         }
     }
@@ -108,8 +112,7 @@ $(document).ready(function() {
 
     var retrieveNickname = function() {
         $.get(apiBaseURL + "me", function(data) {
-            me = data.me
-            myName = me.x500Principal.name;
+            myName = data.me;
 
             $("#myNickname").html(myName);
         });
@@ -129,7 +132,109 @@ $(document).ready(function() {
                     }));
     }
 
+    var setupNewGame = function(chessGame) {
+        signaturesConsole.find("option").remove();
+
+        //Set user's status message
+        printUserMessage(chessGame.isOrganiser ? USER_MESSAGE_STATE_USER_TURN : USER_MESSAGE_STATE_OPPONENT_TURN);
+
+        appendToSignaturesConsole("New game started. Signed tx id: " + chessGame.transactionId);
+
+        initChessBoard(chessGame.isOrganiser ? 'white' : 'black');
+
+        //Setup chessboard in start position
+        board.start();
+
+        CHESS_MOVE_ENABLED = chessGame.isMyTurn;
+    }
+
+    var pollForNewGames = function() {
+        setTimeout(function() {
+            var retrieveGamesEndpoint = apiBaseURL + "games?size=1";
+
+            $.get(retrieveGamesEndpoint, function(data) {
+                var latestGameObj = data.gameStates[0];
+
+                var game = new Game(latestGameObj.state.data.gameId,
+                                    latestGameObj.ref.txhash,
+                                    latestGameObj.state.data.playerANickname,
+                                    latestGameObj.state.data.playerA,
+                                    latestGameObj.state.data.playerB,
+                                    latestGameObj.state.data.playerA == myName);
+
+                if (REJECTED_GAME_IDS.has(game.id) === false &&
+                   ((CURRENT_GAME != null && game.id != CURRENT_GAME.id) || !game.isOrganiser)) {
+                    $("#challengeOpponentName").html(game.opponentNickname);
+
+                    $("#newChallengeGameModal").modal('show');
+
+                    $("#rejectGameChallengeBtn").unbind('click').click(function() {
+                        REJECTED_GAME_IDS.add(game.id);
+
+                        pollForNewGames();
+                    });
+
+                    $("#acceptGameChallengeBtn").unbind('click').click(function() {
+                        CURRENT_GAME = game;
+
+                        $("#newChallengeGameModal").modal('hide');
+
+                        $("#opponentNickname").html(CURRENT_GAME.playerA_X500Name);
+
+                        setupNewGame(game);
+                    });
+                } else {
+                    //if no new game found, then poll again
+                    pollForNewGames();
+                }
+            });
+
+        }, 3000);
+    }
+
+
+    /*
+     * Called when the current user moves a piece on the board
+     */
+    var onGameMove = function(move, fenString) {
+        // Mark the current move, sign & send to opponent
+        CURRENT_GAME.movePlayed(move);
+
+        // Update the message on UI
+        printUserMessage(CURRENT_GAME.isMyTurn ? USER_MESSAGE_STATE_USER_TURN : USER_MESSAGE_STATE_OPPONENT_TURN);
+
+        // write to console
+        appendToSignaturesConsole(fenString);
+    }
+
+
+    var initChessBoard = function(orientation) {
+        $("#chessBoard").replaceWith('<div id="chessBoard"></div>');
+
+        setupChessBoard(onGameMove, orientation);
+    }
+
     retrieveNickname();
     retrievePeers();
-    setupChessBoard(appendToSignaturesConsole);
+    initChessBoard('white');
+
+    pollForNewGames();
 });
+
+
+function Game(id, transactionId, opponentNickname, playerA_X500Name, playerB_X500Name, isOrganiser) {
+    this.id = id;
+    this.transactionId = transactionId;
+    this.opponentNickname = opponentNickname;
+    this.playerA_X500Name = playerA_X500Name;
+    this.playerB_X500Name = playerB_X500Name;
+    this.isOrganiser = isOrganiser;
+    this.isMyTurn = isOrganiser;
+    this.moveIndex = 0;
+
+    this.movePlayed = function(move) {
+        this.isMyTurn = !this.isMyTurn;
+
+        CHESS_MOVE_ENABLED = this.isMyTurn;
+    }
+}

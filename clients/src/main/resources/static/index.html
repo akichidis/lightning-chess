@@ -13,6 +13,7 @@
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-header">
+            <img class="logo" src="img/lightning-chess-logo.png"/>
             <a class="navbar-brand" href="#">Lightning Chess</a>
         </div>
 		<button id="newGameBtn" type="button" class="btn btn-primary navbar-btn">New Game</button>
@@ -49,6 +50,28 @@
         </div>
     </div>
 </div>
+<div id="newChallengeGameModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">New challenge</h4>
+            </div>
+            <form>
+                <div class="modal-body">
+                   <div class="center">
+                       <h3>You have been challenged by <span id="challengeOpponentName"></span></h3>
+                       <br/>
+                       <span>Do you accept the challenge?</span>
+                   </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="acceptGameChallengeBtn" type="button" class="btn btn-default">Yes</button>
+                    <button id="rejectGameChallengeBtn" type="button" class="btn btn-primary" data-dismiss="modal">No</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <div id="messagePopup" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -69,7 +92,7 @@
      border-style: dotted; border-width: 2px;padding:5px;">
         No game created yet
     </div>
-    <div id="chessBoard" style="display: table-cell; width: 400px; margin:auto"></div>
+    <div id="chessBoard"></div>
 </div>
 <br/>
 

@@ -1,11 +1,13 @@
 var CHESSBOARD = {};
 var game, board;
+var CHESS_MOVE_ENABLED = false;
 
-var setupChessBoard = function(onPieceMove) {
+var setupChessBoard = function(onPieceMove, orientation) {
     game = new Chess();
 
     var cfg = {
       draggable: true,
+      orientation: orientation == null ? 'white' : orientation,
       position: 'start',
       onDragStart: onDragStart,
       onDrop: function(source, target) {
@@ -35,6 +37,10 @@ var greySquare = function(square) {
 };
 
 var onDragStart = function(source, piece) {
+  if (!CHESS_MOVE_ENABLED) {
+    return false;
+  }
+
   // do not pick up pieces if the game is over
   // or if it's not that side's turn
   if (game.game_over() === true ||
@@ -45,6 +51,10 @@ var onDragStart = function(source, piece) {
 };
 
 var onDrop = function(source, target, onPieceMove) {
+  if (!CHESS_MOVE_ENABLED) {
+    return false;
+  }
+
   removeGreySquares();
 
   // see if the move is legal
@@ -57,10 +67,14 @@ var onDrop = function(source, target, onPieceMove) {
   // illegal move
   if (move === null) return 'snapback';
 
-  onPieceMove(board.fen());
+  onPieceMove(move, board.fen());
 };
 
 var onMouseoverSquare = function(square, piece) {
+  if (!CHESS_MOVE_ENABLED) {
+    return false;
+  }
+
   // get list of possible moves for this square
   var moves = game.moves({
     square: square,
@@ -80,9 +94,17 @@ var onMouseoverSquare = function(square, piece) {
 };
 
 var onMouseoutSquare = function(square, piece) {
+  if (!CHESS_MOVE_ENABLED) {
+    return false;
+  }
+
   removeGreySquares();
 };
 
 var onSnapEnd = function() {
+  if (!CHESS_MOVE_ENABLED) {
+    return false;
+  }
+
   board.position(game.fen());
 };
