@@ -24,6 +24,10 @@ $(document).ready(function() {
     $('#newChallengeGameModal').modal({show: false});
 
     $("#newGameBtn").click(function() {
+        if ($(this).hasClass("disabled")) {
+            return false;
+        }
+
         //render opponents options
         $("#opponents option").remove();
 
@@ -146,6 +150,9 @@ $(document).ready(function() {
         board.start();
 
         CHESS_MOVE_ENABLED = chessGame.isMyTurn;
+
+        $("#newGameBtn").addClass("disabled");
+        $("#abandonGameBtn").removeClass("disabled");
     }
 
     var pollForNewGames = function() {
