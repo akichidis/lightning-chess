@@ -1,4 +1,4 @@
-package com.lightningchess.webserver
+package com.lightningchess.webserver.dto
 
 import java.util.*
 

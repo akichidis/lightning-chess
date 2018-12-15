@@ -2,8 +2,14 @@ package com.lightningchess.webserver
 
 import com.lightningchess.flow.CreateGameFlow.Initiator
 import com.lightningchess.state.GameState
+import com.lightningchess.webserver.dto.CreateGameResponse
+import com.lightningchess.webserver.dto.NewGameRequest
+import com.lightningchess.webserver.dto.RetrieveGamesResponse
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.messaging.startTrackedFlow
+import net.corda.core.messaging.vaultQueryBy
+import net.corda.core.node.services.Vault
+import net.corda.core.node.services.vault.*
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
 import org.slf4j.LoggerFactory
@@ -65,6 +71,25 @@ class Controller(rpc: NodeRPCConnection) {
             logger.error(ex.message, ex)
             return ResponseEntity.badRequest().build()
         }
+    }
+
+    /**
+     * Retrieves the created game states that haven't been spent (finished) yet. It returns them in RECORDED_TIME
+     * Desc order.
+     */
+    @GetMapping(value = "/games", produces = arrayOf("application/json"))
+    fun retrieveGames(@RequestParam("size") pageSize: Int): ResponseEntity<RetrieveGamesResponse> {
+
+        val sortByRecordedTime = SortAttribute.Standard(attribute = Sort.VaultStateAttribute.RECORDED_TIME)
+        val criteria = QueryCriteria.LinearStateQueryCriteria(status = Vault.StateStatus.UNCONSUMED)
+        val pageSpecification = PageSpecification(DEFAULT_PAGE_NUM, pageSize)
+
+        val gameStates = proxy.vaultQueryBy<GameState>(
+                paging = pageSpecification,
+                criteria = criteria,
+                sorting = Sort(setOf(Sort.SortColumn(sortByRecordedTime, Sort.Direction.DESC)))).states
+
+        return ResponseEntity.ok(RetrieveGamesResponse(gameStates))
     }
 
     private fun retrieveGameId(signedTx: SignedTransaction): UUID {

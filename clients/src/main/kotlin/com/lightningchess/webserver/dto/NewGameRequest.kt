@@ -1,4 +1,4 @@
-package com.lightningchess.webserver
+package com.lightningchess.webserver.dto
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import net.corda.core.identity.CordaX500Name

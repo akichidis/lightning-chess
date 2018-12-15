@@ -22,7 +22,7 @@ object GameSchemaV1 : MappedSchema(
     @Entity
     @Table(name = "game_states")
     class PersistentGame(
-            @Column(name = "gameId")
+            @Column(name = "game_id")
             var gameId: UUID,
 
             @Column(name = "player_a_nickname")

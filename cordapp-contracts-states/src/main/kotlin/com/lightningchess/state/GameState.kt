@@ -23,7 +23,7 @@ data class GameState(val gameId: UUID,
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
             is GameSchemaV1 -> GameSchemaV1.PersistentGame(
-                    UUID.randomUUID(),
+                    gameId,
                     playerANickname,
                     this.linearId.id
             )
