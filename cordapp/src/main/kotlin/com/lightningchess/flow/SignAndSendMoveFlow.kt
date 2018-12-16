@@ -1,6 +1,7 @@
 package com.lightningchess.flow
 
 import co.paralleluniverse.fibers.Suspendable
+import com.lightningchess.flow.cache.GameMoveCache
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
 import net.corda.core.serialization.serialize
@@ -39,6 +40,7 @@ object SignAndSendMoveFlow {
          */
         @Suspendable
         override fun call(): SignedGameMove {
+
             val me = serviceHub.myInfo.legalIdentities.single()
 
             // Stage 1. Sign the move
@@ -64,10 +66,13 @@ object SignAndSendMoveFlow {
     @InitiatedBy(SignAndSendMoveFlow.Sign::class)
     class Acceptor(val otherPartyFlow: FlowSession) : FlowLogic<Boolean>() {
         object VALIDATING_MOVE : ProgressTracker.Step("Validating the received signed move.")
+        object STORING_MOVE : ProgressTracker.Step("Storing the received move in database.")
 
         companion object {
             fun tracker() = ProgressTracker(
-                    VALIDATING_MOVE
+                    VALIDATING_MOVE,
+                    STORING_MOVE
+
             )
         }
 
@@ -75,6 +80,8 @@ object SignAndSendMoveFlow {
 
         @Suspendable
         override fun call(): Boolean {
+            val me = serviceHub.myInfo.legalIdentities.single()
+
             // Step 1. Verifying signature and validating move
             progressTracker.currentStep = VALIDATING_MOVE
 
@@ -84,6 +91,13 @@ object SignAndSendMoveFlow {
             val signature = signedGameMove.signature
 
             signature.verify(gameMove.serialize().bytes)
+
+            // Step 2. Store state in form of transaction. This step is performed in order to store this information
+            // on the node's database. It could be replaced by something different, like storing on a cache or casting
+            // to a queue
+            progressTracker.currentStep = STORING_MOVE
+
+            GameMoveCache.addGameMove(signedGameMove)
 
             otherPartyFlow.send(true)
 

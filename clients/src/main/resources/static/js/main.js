@@ -240,13 +240,11 @@ $(document).ready(function() {
         this.isOrganiser = isOrganiser;
         this.isMyTurn = isOrganiser;
         this.moveIndex = 0;
+        this.previousSignature;
 
         this.movePlayed = function(move, fenString) {
             console.log(move);
             this.isMyTurn = !this.isMyTurn;
-
-            // increment the series index
-            this.moveIndex += 1;
 
             var signGameMove = apiBaseURL + "sign-game";
 
@@ -265,9 +263,13 @@ $(document).ready(function() {
                 success: function(data) {
                     console.log(data);
 
+                    this.previousSignature = data.signature
+
                     // write to console
                     appendToSignaturesConsole("Move: " + JSON.stringify(move) + " - signature: " + JSON.stringify(data.signature));
 
+                    // increment the series index
+                    this.moveIndex += 1;
                  },
                 error: function(data) {
                 }

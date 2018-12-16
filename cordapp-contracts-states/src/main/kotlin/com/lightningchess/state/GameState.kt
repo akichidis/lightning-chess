@@ -1,6 +1,7 @@
 package com.lightningchess.state
 
 import com.lightningchess.schema.GameSchemaV1
+import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
