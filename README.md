@@ -41,6 +41,15 @@ Because Corda is more versatile, provides extra privacy and it's actually doable
 4. game ends → submit a tx that includes the last two signed moves. For instance, a player provides the signed winning move + the signed previous move of the opponent. Alternatively, a signed acceptance/resignation from the other party or a mutually signed agreement on the result would be enough (this is the 1st iteration). The main benefit with this approach is you don't need to send the full move-sequence and chessboard states, simplifying the contract logic by  large degree.
 5. The aim is that the smart contract verify logic should be able to identify a winning or draw state, so consuming of the potentially encumbered assets (awards) is possible.
 
+**Signed payload per move**
+
+Each player should sign his/her move before sending it to the opponent. The signed `GameMove` object should have the following properties:
+* `gameId`: required to ensure that this signature applies to a particular chess game; note that each `gameId` should be unique.  
+* `index`: a counter that represents the actual _move-index_, starting from zero. We need this to avoid replay attacks by reusing an old signature that was generated in a previous move.   
+* `fen`: the game position in [FEN](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation) form. Theoretically, we could avoid sending the current state on each move, because everytime users sign their next move, they inherently accepted the previous state. However, including FEN will speed up move validation, as reruning the whole game from scratch is not required.
+* `move`: the actual _from-to_ move. We highlight that a move might involve two pieces as in teh case of [castling](https://en.wikipedia.org/wiki/Castling).
+* `previousSignature`: opponent's signature on his/her most recent move. This is required to create a chain of actions and resist against malicious users signing different moves, then trying to "convince" the smart contract that the opponent played a wrong move.
+
 **Ideas:** 
 1. sequence of moves can work like a blockchain Vs a counter.
 2. using the encumbrance feature one can create a tournament with real cash prizes.
