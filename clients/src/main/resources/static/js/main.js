@@ -322,6 +322,8 @@ $(document).ready(function() {
             appendToSignaturesConsole("Move: " + signedGameMove.move + " - signature: " + signedGameMove.signature);
 
             this.flipTurn();
+
+            printUserMessage(USER_MESSAGE_STATE_USER_TURN);
         }
 
         this.movePlayed = function(move, fenString) {
@@ -351,6 +353,8 @@ $(document).ready(function() {
 
                     // write to console
                     appendToSignaturesConsole("Move: " + JSON.stringify(move) + " - signature: " + JSON.stringify(data.signature));
+
+                    printUserMessage(USER_MESSAGE_STATE_OPPONENT_TURN);
 
                     // Now start listening for next opponent move
                     scheduleForNextGameResponse();
