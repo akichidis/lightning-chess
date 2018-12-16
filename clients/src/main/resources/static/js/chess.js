@@ -1524,6 +1524,17 @@ var Chess = function(fen) {
       return turn;
     },
 
+    setTurn: function(newTurn) {
+        turn = newTurn;
+    },
+
+    flipTurn: function() {
+        console.log("Current turn: " + turn);
+        turn = turn == WHITE ? BLACK : WHITE;
+        console.log("Flipped turn: " + turn);
+
+    },
+
     move: function(move, options) {
       /* The move function can be called with in the following parameters:
        *

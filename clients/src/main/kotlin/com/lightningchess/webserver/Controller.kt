@@ -2,10 +2,14 @@ package com.lightningchess.webserver
 
 import com.lightningchess.flow.CreateGameFlow.Initiator
 import com.lightningchess.flow.GameMove
+import com.lightningchess.flow.GetGameMovesFlow
+import com.lightningchess.flow.GetGameMovesFlow.GetMoves
 import com.lightningchess.flow.SignAndSendMoveFlow.Sign
+import com.lightningchess.flow.SignedGameMove
 import com.lightningchess.state.GameState
 import com.lightningchess.webserver.dto.*
 import net.corda.core.identity.CordaX500Name
+import net.corda.core.messaging.startFlow
 import net.corda.core.messaging.startTrackedFlow
 import net.corda.core.messaging.vaultQueryBy
 import net.corda.core.node.services.Vault
@@ -17,6 +21,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
 import java.util.*
+import java.util.concurrent.ExecutionException
 
 /**
  * Define your API endpoints here.
@@ -55,14 +60,14 @@ class Controller(rpc: NodeRPCConnection) {
      * Creates a new game by providing the opponent's X500 name. If the opponent (node) is up and running and sign the
      * contract, then the game will be considered as started.
      */
-    @PostMapping(value = "/create-game", produces = arrayOf("application/json"))
+    @PostMapping(value = "/games", produces = arrayOf("application/json"))
     fun createGame(@RequestBody gameRequest: NewGameRequest): ResponseEntity<CreateGameResponse> {
         print(gameRequest)
 
         val opponent = proxy.wellKnownPartyFromX500Name(gameRequest.opponentX500Name) ?:
         return ResponseEntity.badRequest().build()
 
-        return try {
+        try {
             val signedTx = proxy.startTrackedFlow(::Initiator, gameRequest.userNickname, opponent).returnValue.getOrThrow()
 
             return ResponseEntity.created(URI(""))
@@ -92,8 +97,8 @@ class Controller(rpc: NodeRPCConnection) {
         return ResponseEntity.ok(RetrieveGamesResponse(gameStates))
     }
 
-    @PostMapping(value = "/sign-game", produces = arrayOf("application/json"))
-    fun signGameMove(@RequestBody signGameMoveRequest: SignGameMoveRequest): ResponseEntity<SignGameMoveResponse> {
+    @PostMapping(value = "/games/{id}/moves", produces = arrayOf("application/json"))
+    fun signGameMove(@PathVariable("id") gameId: UUID, @RequestBody signGameMoveRequest: SignGameMoveRequest): ResponseEntity<SignGameMoveResponse> {
         val opponent = proxy.wellKnownPartyFromX500Name(signGameMoveRequest.opponentX500Name) ?:
         return ResponseEntity.badRequest().build()
 
@@ -103,7 +108,18 @@ class Controller(rpc: NodeRPCConnection) {
         // Sign the move & Initiate the flow and send it to the opponent
         val signedGameMove = proxy.startTrackedFlow(::Sign, gameMove, opponent).returnValue.getOrThrow()
 
-        return ResponseEntity.created(URI("")).body(SignGameMoveResponse(signedGameMove.signature))
+        return ResponseEntity.created(URI("")).body(SignGameMoveResponse(signedGameMove.signature!!))
+    }
+
+    @GetMapping(value = "/games/{id}/moves", produces = arrayOf("application/json"))
+    fun getLastGameMove(@PathVariable("id") gameId: UUID) :ResponseEntity<SignedGameMove> {
+        try {
+            val signedGameMove = proxy.startFlow(::GetMoves, gameId).returnValue.get()
+
+            return ResponseEntity.ok(signedGameMove)
+        } catch (e: ExecutionException) {
+            return ResponseEntity.ok().build()
+        }
     }
 
     private fun retrieveGameId(signedTx: SignedTransaction): UUID {

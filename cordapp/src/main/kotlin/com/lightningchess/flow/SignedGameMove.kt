@@ -5,4 +5,5 @@ import net.corda.core.serialization.CordaSerializable
 
 @CordaSerializable
 data class SignedGameMove(val gameMove: GameMove,
-                          val signature: DigitalSignature.WithKey) {}
+                          val signature: DigitalSignature.WithKey) {
+}

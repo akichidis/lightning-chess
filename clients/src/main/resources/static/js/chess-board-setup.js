@@ -57,6 +57,9 @@ var onDrop = function(source, target, onPieceMove) {
 
   removeGreySquares();
 
+  // We keep the fen before the move
+  var beforeMoveFen = board.fen();
+
   // see if the move is legal
   var move = game.move({
     from: source,
@@ -67,7 +70,7 @@ var onDrop = function(source, target, onPieceMove) {
   // illegal move
   if (move === null) return 'snapback';
 
-  onPieceMove(move, board.fen());
+  onPieceMove(move, beforeMoveFen, board.fen());
 };
 
 var onMouseoverSquare = function(square, piece) {
