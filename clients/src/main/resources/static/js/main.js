@@ -3,6 +3,9 @@
 var USER_MESSAGE_STATE_GAME_NOT_CREATED = 0;
 var USER_MESSAGE_STATE_USER_TURN = 1;
 var USER_MESSAGE_STATE_OPPONENT_TURN = 2;
+var USER_MESSAGE_STATE_USER_WON = 3;
+var USER_MESSAGE_STATE_USER_LOST = 4;
+var USER_MESSAGE_STATE_DRAW = 5;
 
 var CURRENT_GAME;
 
@@ -102,6 +105,15 @@ $(document).ready(function() {
                 var opponentColor = CURRENT_GAME.isOrganiser ? 'Black' : 'White';
 
                 userMessagesPanel.html("<b>" + opponentColor + " plays:</b><br/> Waiting for opponent's move...");
+                break;
+            case USER_MESSAGE_STATE_USER_WON:
+                userMessagesPanel.html("<b>You WON!</b>");
+                break;
+            case USER_MESSAGE_STATE_USER_LOST:
+                userMessagesPanel.html("<b>You LOST!</b>");
+                break;
+            case USER_MESSAGE_STATE_DRAW:
+                userMessagesPanel.html("<b>Game is DRAW!</b>");
                 break;
         }
     }
@@ -278,6 +290,14 @@ $(document).ready(function() {
         this.moveIndex = 0;
         this.previousSignature;
         this.signedGameMoves = new Set();
+        this.myColor = isOrganiser ? 'w' : 'b';
+        this.winStatus = null;
+
+        var WIN = 'W';
+        var LOST = 'L';
+        var DRAW = 'D';
+
+        var thisGame = this;
 
         CHESS_MOVE_ENABLED = this.isMyTurn;
 
@@ -321,6 +341,9 @@ $(document).ready(function() {
 
             appendToSignaturesConsole("Move: " + signedGameMove.move + " - signature: " + signedGameMove.signature);
 
+            // Check the board's winning state
+            this.checkWinningState(false);
+
             this.flipTurn();
 
             printUserMessage(USER_MESSAGE_STATE_USER_TURN);
@@ -337,8 +360,6 @@ $(document).ready(function() {
                              "index": this.moveIndex,
                              "fen": fenString,
                              "move": JSON.stringify(move) }
-
-            var thisGame = this;
 
             $.ajax({
                 url: signGameMove,
@@ -359,7 +380,81 @@ $(document).ready(function() {
                     // Now start listening for next opponent move
                     scheduleForNextGameResponse();
 
+                    //check for winning situation
+                    thisGame.checkWinningState(true);
+
                     thisGame.flipTurn();
+                 },
+                error: function(data) {
+                }
+            });
+        }
+
+        this.checkWinningState = function(lastMoveWasMine) {
+            console.log("Is game over: " + game.game_over());
+
+            if (game.game_over()) {
+                if (game.in_checkmate()) {
+                    if (lastMoveWasMine) {
+                        thisGame.winStatus = WIN;
+
+                        console.log("I won the game!");
+
+                        messagePopup.find(".text")
+                                    .addClass("center")
+                                    .html('<h4>Checkmate, You\'ve WON! :)</h4>');
+
+                        printUserMessage(USER_MESSAGE_STATE_USER_WON);
+                    } else {
+                        this.winStatus = LOST;
+
+                        console.log("I lost the game");
+
+                        messagePopup.find(".text")
+                                    .addClass("center")
+                                    .html('<h4>Checkmate, You\'ve LOST! :(</h4>');
+
+                        printUserMessage(USER_MESSAGE_STATE_USER_LOST);
+                    }
+                } else {
+                    thisGame.winStatus = DRAW;
+
+                    console.log("It's a draw!");
+
+                    messagePopup.find(".text")
+                                .addClass("center")
+                                .html('<h4>It\'s a draw! :)</h4>');
+
+                    printUserMessage(USER_MESSAGE_STATE_DRAW);
+                }
+
+                messagePopup.find(".modal-title").html("Game ended");
+
+                messagePopup.modal('show');
+
+                $("#closePopupBtn").unbind("click").click(function(){
+                    messagePopup.modal('hide');
+
+                    console.log("Win status: " + thisGame.winStatus + " " + LOST);
+
+                    if (thisGame.winStatus === LOST) {
+                        console.log("Send signature with I_LOST message");
+
+                        thisGame.sendGameLost();
+                    }
+                });
+            }
+        }
+
+        this.sendGameLost = function() {
+            var abandonGameUrl = apiBaseURL + "games/" + thisGame.id + "/abandon";
+
+            $.ajax({
+                url: abandonGameUrl,
+                type: 'post',
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function(data) {
                  },
                 error: function(data) {
                 }

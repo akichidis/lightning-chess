@@ -2,7 +2,6 @@ package com.lightningchess.webserver
 
 import com.lightningchess.flow.CreateGameFlow.Initiator
 import com.lightningchess.flow.GameMove
-import com.lightningchess.flow.GetGameMovesFlow
 import com.lightningchess.flow.GetGameMovesFlow.GetMoves
 import com.lightningchess.flow.SignAndSendMoveFlow.Sign
 import com.lightningchess.flow.SignedGameMove
@@ -117,6 +116,17 @@ class Controller(rpc: NodeRPCConnection) {
             val signedGameMove = proxy.startFlow(::GetMoves, gameId).returnValue.get()
 
             return ResponseEntity.ok(signedGameMove)
+        } catch (e: ExecutionException) {
+            return ResponseEntity.ok().build()
+        }
+    }
+
+    @PostMapping(value = "/games/{id}/abandon", produces = arrayOf("application/json"))
+    fun abandonGame(@PathVariable("id") gameId: UUID) :ResponseEntity<Boolean> {
+        try {
+            //val signedGameMove = proxy.startFlow(::GetMoves, gameId).returnValue.get()
+
+            return ResponseEntity.ok(true)
         } catch (e: ExecutionException) {
             return ResponseEntity.ok().build()
         }
