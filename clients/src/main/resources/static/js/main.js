@@ -12,6 +12,9 @@ var CURRENT_GAME;
 var REJECTED_GAME_IDS = new Set();
 
 $(document).ready(function() {
+    var NEXT_RESPONSE_TIMER;
+    var POLL_FOR_NEW_GAMES_TIMER;
+
     var signaturesConsole = $("#signaturesPanel");
     var messagePopup = $('#messagePopup');
     var createGamePopupErrorAlert = $("#createGameErrorAlert");
@@ -45,6 +48,7 @@ $(document).ready(function() {
     });
 
     $("#abandonGameBtn").click(function() {
+        CURRENT_GAME.sendGameLost();
     });
 
     $("#modalCreateGameBtn").click(function() {
@@ -82,6 +86,10 @@ $(document).ready(function() {
 
                 // This essentially "starts" the game
                 setupNewGame(CURRENT_GAME);
+
+                if (POLL_FOR_NEW_GAMES_TIMER != null) {
+                    clearTimeout(POLL_FOR_NEW_GAMES_TIMER);
+                }
             },
             error: function(data) {
                 createGamePopupErrorAlert.find(".alertText").html(JSON.stringify(data));
@@ -170,7 +178,7 @@ $(document).ready(function() {
     }
 
     var scheduleForNextGameResponse = function() {
-        setTimeout(function() {
+        NEXT_RESPONSE_TIMER = setTimeout(function() {
             var retrieveGameMovesEndpoint = apiBaseURL + "games/" + CURRENT_GAME.id + "/moves";
 
             $.get(retrieveGameMovesEndpoint, function(response) {
@@ -196,7 +204,7 @@ $(document).ready(function() {
     }
 
     var pollForNewGames = function() {
-        setTimeout(function() {
+        POLL_FOR_NEW_GAMES_TIMER = setTimeout(function() {
             var retrieveGamesEndpoint = apiBaseURL + "games?size=1";
 
             $.get(retrieveGamesEndpoint, function(data) {
@@ -339,7 +347,7 @@ $(document).ready(function() {
             board.move(move.from + "-" + move.to);
             game.move(move);
 
-            appendToSignaturesConsole("Move: " + signedGameMove.move + " - signature: " + signedGameMove.signature);
+            appendToSignaturesConsole("Move [" + signedGameMove.index + "] signature: " + JSON.stringify(signedGameMove.signature));
 
             // Check the board's winning state
             this.checkWinningState(false);
@@ -373,7 +381,7 @@ $(document).ready(function() {
                     thisGame.previousSignature = data.signature
 
                     // write to console
-                    appendToSignaturesConsole("Move: " + JSON.stringify(move) + " - signature: " + JSON.stringify(data.signature));
+                    appendToSignaturesConsole("Move [" + thisGame.moveIndex + "] signature: " + JSON.stringify(data.signature));
 
                     printUserMessage(USER_MESSAGE_STATE_OPPONENT_TURN);
 
@@ -443,6 +451,11 @@ $(document).ready(function() {
                         thisGame.sendGameLost();
                     }
                 });
+
+                //Clear the timeout
+                if (NEXT_RESPONSE_TIMER != null) {
+                    clearTimeout(NEXT_RESPONSE_TIMER);
+                }
             }
         }
 
@@ -455,6 +468,7 @@ $(document).ready(function() {
                 dataType: 'json',
                 contentType: 'application/json',
                 success: function(data) {
+                    appendToSignaturesConsole("Abandon txId: " + data);
                  },
                 error: function(data) {
                 }

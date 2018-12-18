@@ -18,3 +18,7 @@ img.logo {
 body {
     background-image: url('../img/background.png');
 }
+
+#signaturesPanel {
+    height: 150px;
+}

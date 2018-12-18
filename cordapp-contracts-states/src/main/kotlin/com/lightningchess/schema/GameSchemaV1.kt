@@ -1,5 +1,6 @@
 package com.lightningchess.schema
 
+import com.lightningchess.state.GameState
 import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
 import java.util.*
@@ -25,6 +26,9 @@ object GameSchemaV1 : MappedSchema(
             @Column(name = "game_id")
             var gameId: UUID,
 
+            @Column(name = "winner")
+            var winner: GameState.Winner,
+
             @Column(name = "player_a_nickname")
             var playerANickname: String,
 
@@ -32,6 +36,6 @@ object GameSchemaV1 : MappedSchema(
             var linearId: UUID
     ) : PersistentState() {
         // Default constructor required by hibernate.
-        constructor(): this(UUID.randomUUID(), "", UUID.randomUUID())
+        constructor(): this(UUID.randomUUID(), GameState.Winner.NOT_FINISHED, "", UUID.randomUUID())
     }
 }

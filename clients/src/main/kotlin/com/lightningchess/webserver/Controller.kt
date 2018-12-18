@@ -1,5 +1,6 @@
 package com.lightningchess.webserver
 
+import com.lightningchess.flow.AbandonGameFlow.Abandon
 import com.lightningchess.flow.CreateGameFlow.Initiator
 import com.lightningchess.flow.GameMove
 import com.lightningchess.flow.GetGameMovesFlow.GetMoves
@@ -7,6 +8,7 @@ import com.lightningchess.flow.SignAndSendMoveFlow.Sign
 import com.lightningchess.flow.SignedGameMove
 import com.lightningchess.state.GameState
 import com.lightningchess.webserver.dto.*
+import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.messaging.startFlow
 import net.corda.core.messaging.startTrackedFlow
@@ -122,13 +124,13 @@ class Controller(rpc: NodeRPCConnection) {
     }
 
     @PostMapping(value = "/games/{id}/abandon", produces = arrayOf("application/json"))
-    fun abandonGame(@PathVariable("id") gameId: UUID) :ResponseEntity<Boolean> {
+    fun abandonGame(@PathVariable("id") gameId: UUID) :ResponseEntity<SecureHash> {
         try {
-            //val signedGameMove = proxy.startFlow(::GetMoves, gameId).returnValue.get()
+            val signedTx = proxy.startFlow(::Abandon, gameId).returnValue.get()
 
-            return ResponseEntity.ok(true)
+            return ResponseEntity.ok(signedTx.tx.id)
         } catch (e: ExecutionException) {
-            return ResponseEntity.ok().build()
+            return ResponseEntity.badRequest().build()
         }
     }
 
