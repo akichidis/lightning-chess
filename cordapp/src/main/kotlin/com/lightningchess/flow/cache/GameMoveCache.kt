@@ -17,7 +17,7 @@ class GameMoveCache {
             gamesMoves.getOrPut(signedGameMove.gameMove.gameId) { ArrayList() }.add(signedGameMove)
         }
 
-        fun getLatestAndMove(gameId: UUID): SignedGameMove {
+        fun getLatestGameMove(gameId: UUID): SignedGameMove {
             return gamesMoves.getOrPut(gameId) { ArrayList() }.last()
         }
     }

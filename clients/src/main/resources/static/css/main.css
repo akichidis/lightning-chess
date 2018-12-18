@@ -22,3 +22,7 @@ body {
 #signaturesPanel {
     height: 150px;
 }
+
+#gameLoader {
+    width: 40px;
+}

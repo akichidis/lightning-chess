@@ -54,6 +54,9 @@ $(document).ready(function() {
     $("#modalCreateGameBtn").click(function() {
         $("#createGameErrorAlert .alertText").html("");
 
+        $("#createGameModal button").toggleClass("hide");
+        $("#gameLoader").toggleClass("hide");
+
         var opponentX500Name = $("#opponents").val();
         var nickname = $("#nickname").val();
 
@@ -70,7 +73,7 @@ $(document).ready(function() {
             success: function(data) {
                 console.log(data);
 
-                $("#myNickname").html(myName + " (" + nickname + ")");
+                $("#myNickname").html(myName + " (" + nickname + " - PLAYER_A)");
                 $("#opponentNickname").html(opponentX500Name);
 
                 $("#createGameModal").modal('hide');
@@ -90,11 +93,17 @@ $(document).ready(function() {
                 if (POLL_FOR_NEW_GAMES_TIMER != null) {
                     clearTimeout(POLL_FOR_NEW_GAMES_TIMER);
                 }
+
+                $("#createGameModal button").toggleClass("hide");
+                $("#gameLoader").toggleClass("hide");
             },
             error: function(data) {
                 createGamePopupErrorAlert.find(".alertText").html(JSON.stringify(data));
 
                 createGamePopupErrorAlert.alert('show');
+
+                $("#createGameModal button").toggleClass("hide");
+                $("#gameLoader").toggleClass("hide");
             }
         });
     });
@@ -172,6 +181,10 @@ $(document).ready(function() {
         $("#newGameBtn").addClass("disabled");
         $("#abandonGameBtn").removeClass("disabled");
 
+        if (!chessGame.isOrganiser) {
+            $("#myNickname").html(myName + " (PLAYER_B)");
+        }
+
         if (!chessGame.isMyTurn) {
             scheduleForNextGameResponse();
         }
@@ -182,15 +195,15 @@ $(document).ready(function() {
             var retrieveGameMovesEndpoint = apiBaseURL + "games/" + CURRENT_GAME.id + "/moves";
 
             $.get(retrieveGameMovesEndpoint, function(response) {
-                if (response != null && response != "") {
-                    var gameMove = response.gameMove;
+                if (response != null && response.length > 0) {
+                    var gameMove = response[0].gameMove;
 
                     var move = new SignedGameMove(gameMove.gameId,
                                                   gameMove.index,
                                                   gameMove.fen,
                                                   gameMove.move,
                                                   gameMove.previousSignature,
-                                                  response.signature);
+                                                  response[0].signature);
 
                     if (!CURRENT_GAME.moveExists(move)) {
                         CURRENT_GAME.addOpponentMove(move);
@@ -252,6 +265,36 @@ $(document).ready(function() {
         }, 3000);
     }
 
+    var pollForAbandonedGame = function() {
+        setTimeout(function() {
+            var retrieveGamesEndpoint = apiBaseURL + "games?size=1&finishedOnly=true";
+
+            $.get(retrieveGamesEndpoint, function(data) {
+                var latestGameObj = data.gameStates[0];
+
+                if (latestGameObj == null) {
+                    pollForAbandonedGame();
+                    return;
+                }
+
+                var game = new Game(latestGameObj.state.data.gameId,
+                                    latestGameObj.ref.txhash,
+                                    latestGameObj.state.data.playerANickname,
+                                    latestGameObj.state.data.playerA,
+                                    latestGameObj.state.data.playerB,
+                                    latestGameObj.state.data.playerA == myName,
+                                    latestGameObj.state.data.winner);
+
+                if (game.id == CURRENT_GAME.id && game.winner != "NOT_FINISHED") {
+                    appendToSignaturesConsole("Abandon! Winner: " + game.winner + ", txId: " + latestGameObj.ref.txhash);
+                } else {
+                    pollForAbandonedGame();
+                }
+            });
+
+        }, 3000);
+    }
+
 
     /*
      * Called when the current user moves a piece on the board
@@ -287,7 +330,7 @@ $(document).ready(function() {
         this.signature = signature;
     }
 
-    function Game(id, transactionId, opponentNickname, playerA_X500Name, playerB_X500Name, isOrganiser) {
+    function Game(id, transactionId, opponentNickname, playerA_X500Name, playerB_X500Name, isOrganiser, winner) {
         this.id = id;
         this.transactionId = transactionId;
         this.opponentNickname = opponentNickname;
@@ -300,6 +343,7 @@ $(document).ready(function() {
         this.signedGameMoves = new Set();
         this.myColor = isOrganiser ? 'w' : 'b';
         this.winStatus = null;
+        this.winner = winner;
 
         var WIN = 'W';
         var LOST = 'L';
@@ -347,7 +391,7 @@ $(document).ready(function() {
             board.move(move.from + "-" + move.to);
             game.move(move);
 
-            appendToSignaturesConsole("Move [" + signedGameMove.index + "] signature: " + JSON.stringify(signedGameMove.signature));
+            appendToSignaturesConsole("Move [" + signedGameMove.index + "] " + signedGameMove.move + " signature: " + JSON.stringify(signedGameMove.signature));
 
             // Check the board's winning state
             this.checkWinningState(false);
@@ -381,7 +425,7 @@ $(document).ready(function() {
                     thisGame.previousSignature = data.signature
 
                     // write to console
-                    appendToSignaturesConsole("Move [" + thisGame.moveIndex + "] signature: " + JSON.stringify(data.signature));
+                    appendToSignaturesConsole("Move [" + thisGame.moveIndex + "] " + JSON.stringify(move) + " signature: " + JSON.stringify(data.signature));
 
                     printUserMessage(USER_MESSAGE_STATE_OPPONENT_TURN);
 
@@ -413,6 +457,9 @@ $(document).ready(function() {
                                     .html('<h4>Checkmate, You\'ve WON! :)</h4>');
 
                         printUserMessage(USER_MESSAGE_STATE_USER_WON);
+
+                        // Start looking if the opponent has "abandoned" the game.
+                        pollForAbandonedGame();
                     } else {
                         this.winStatus = LOST;
 

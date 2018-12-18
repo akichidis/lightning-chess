@@ -8,6 +8,7 @@ import net.corda.core.contracts.requireThat
 import net.corda.core.crypto.DigitalSignature
 import net.corda.core.identity.Party
 import net.corda.core.serialization.CordaSerializable
+import net.corda.core.serialization.serialize
 import net.corda.core.transactions.LedgerTransaction
 import java.util.*
 
@@ -42,17 +43,25 @@ open class GameContract : Contract {
             //A game is finished - abandon
             is Commands.Abandon -> {
                 requireThat {
+
                     "Only one GameState input should be given" using (inputGameStates.size == 1)
                     "Only one output GameState should be created." using (outputGameStates.size == 1)
-                    "Input state should be unfinished" using (inputGameStates[0].winner == GameState.Winner.NOT_FINISHED)
-                    "Input & output state linear ids should be the same" using (inputGameStates[0].linearId == inputGameStates[1].linearId)
 
+                    val inputGame = inputGameStates[0]
+                    val outputGame = outputGameStates[0]
+                    "Input state should be unfinished" using (inputGame.winner == GameState.Winner.NOT_FINISHED)
+                    "Input & output state linear ids should be the same" using (inputGame.linearId == outputGame.linearId)
+
+                    val abandonSignature = (command.value as Commands.Abandon).abandonSignature
                     val abandonSigner = (command.value as Commands.Abandon).abandonSignature.signature.by
-                    val participants = inputGameStates[0].participants
+                    val participants = inputGame.participants
 
                     "Abandon signer should be one of the players." using (participants.map { it.owningKey }.contains(abandonSigner))
+                    "Abandon signature should be for the given game id" using (abandonSignature.payload.gameId == inputGame.gameId)
 
-                    val winner = getWinner(outputGameStates[0])
+                    "Abandon signature should be valid" using abandonSignature.signature.isValid(abandonSignature.payload.serialize().bytes)
+
+                    val winner = getWinner(outputGame)
 
                     "Abandon signer can not be the winner" using (abandonSigner != winner.owningKey)
                 }

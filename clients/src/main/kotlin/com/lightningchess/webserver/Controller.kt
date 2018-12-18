@@ -80,11 +80,11 @@ class Controller(rpc: NodeRPCConnection) {
     }
 
     /**
-     * Retrieves the created game states that haven't been spent (finished) yet. It returns them in RECORDED_TIME
-     * Desc order.
+     * Retrieves the created game states and returns them in RECORDED_TIME Desc order. By default, only the non finished
+     * states are returned. If the [finishedOnly] is passed as true, then only the finished games will be returned instead.
      */
     @GetMapping(value = "/games", produces = arrayOf("application/json"))
-    fun retrieveGames(@RequestParam("size") pageSize: Int): ResponseEntity<RetrieveGamesResponse> {
+    fun retrieveGames(@RequestParam("size") pageSize: Int, @RequestParam("finishedOnly") finishedOnly: Boolean = false): ResponseEntity<RetrieveGamesResponse> {
 
         val sortByRecordedTime = SortAttribute.Standard(attribute = Sort.VaultStateAttribute.RECORDED_TIME)
         val criteria = QueryCriteria.LinearStateQueryCriteria(status = Vault.StateStatus.UNCONSUMED)
@@ -93,7 +93,10 @@ class Controller(rpc: NodeRPCConnection) {
         val gameStates = proxy.vaultQueryBy<GameState>(
                 paging = pageSpecification,
                 criteria = criteria,
-                sorting = Sort(setOf(Sort.SortColumn(sortByRecordedTime, Sort.Direction.DESC)))).states
+                sorting = Sort(setOf(Sort.SortColumn(sortByRecordedTime, Sort.Direction.DESC))))
+                .states
+                .filter { if (finishedOnly) it.state.data.winner != GameState.Winner.NOT_FINISHED
+                            else it.state.data.winner == GameState.Winner.NOT_FINISHED }
 
         return ResponseEntity.ok(RetrieveGamesResponse(gameStates))
     }
@@ -113,11 +116,11 @@ class Controller(rpc: NodeRPCConnection) {
     }
 
     @GetMapping(value = "/games/{id}/moves", produces = arrayOf("application/json"))
-    fun getLastGameMove(@PathVariable("id") gameId: UUID) :ResponseEntity<SignedGameMove> {
+    fun getLastGameMove(@PathVariable("id") gameId: UUID) :ResponseEntity<List<SignedGameMove>> {
         try {
-            val signedGameMove = proxy.startFlow(::GetMoves, gameId).returnValue.get()
+            val signedGameMoves = proxy.startFlow(::GetMoves, gameId).returnValue.get()
 
-            return ResponseEntity.ok(signedGameMove)
+            return ResponseEntity.ok(signedGameMoves)
         } catch (e: ExecutionException) {
             return ResponseEntity.ok().build()
         }
