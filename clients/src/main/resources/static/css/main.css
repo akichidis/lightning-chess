@@ -26,3 +26,7 @@ body {
 #gameLoader {
     width: 40px;
 }
+
+#movePopupText {
+    word-break: break-all;
+}

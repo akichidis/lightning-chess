@@ -28,6 +28,12 @@ $(document).ready(function() {
     $('#createGameModal').modal({show: false});
     $('#messagePopup').modal({show: false});
     $('#newChallengeGameModal').modal({show: false});
+    $("#movePopup").modal({show: false});
+
+    signaturesConsole.change(function() {
+        $("#movePopupText").html($(this).val());
+        $("#movePopup").modal('show');
+    });
 
     $("#newGameBtn").click(function() {
         if ($(this).hasClass("disabled")) {
