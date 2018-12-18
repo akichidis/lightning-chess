@@ -394,8 +394,10 @@ $(document).ready(function() {
 
             // Play the move
             var move = JSON.parse(signedGameMove.move);
-            board.move(move.from + "-" + move.to);
+
             game.move(move);
+            board.move(move.from + "-" + move.to);
+            board.position(game.fen());
 
             appendToSignaturesConsole("Move [" + signedGameMove.index + "] " + signedGameMove.move + " signature: " + JSON.stringify(signedGameMove.signature));
 

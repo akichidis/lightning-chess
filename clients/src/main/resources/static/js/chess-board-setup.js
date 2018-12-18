@@ -105,9 +105,5 @@ var onMouseoutSquare = function(square, piece) {
 };
 
 var onSnapEnd = function() {
-  if (!CHESS_MOVE_ENABLED) {
-    return false;
-  }
-
   board.position(game.fen());
 };
