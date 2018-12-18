@@ -5,9 +5,9 @@ import net.corda.core.serialization.CordaSerializable
 import java.util.*
 
 @CordaSerializable
-data class GameMove(val gameId: UUID,
+data class GameMove(val move: String,
+                    val gameId: UUID,
                     val index: Int,
                     val fen: String,
-                    val move: String,
                     val previousSignature: DigitalSignature.WithKey?) {
 }

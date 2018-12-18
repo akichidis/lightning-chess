@@ -106,8 +106,8 @@ class Controller(rpc: NodeRPCConnection) {
         val opponent = proxy.wellKnownPartyFromX500Name(signGameMoveRequest.opponentX500Name) ?:
         return ResponseEntity.badRequest().build()
 
-        val gameMove = GameMove(signGameMoveRequest.gameId, signGameMoveRequest.index, signGameMoveRequest.fen,
-                signGameMoveRequest.move, signGameMoveRequest.previousSignature)
+        val gameMove = GameMove(signGameMoveRequest.move, signGameMoveRequest.gameId,
+                signGameMoveRequest.index, signGameMoveRequest.fen, signGameMoveRequest.previousSignature)
 
         // Sign the move & Initiate the flow and send it to the opponent
         val signedGameMove = proxy.startTrackedFlow(::Sign, gameMove, opponent).returnValue.getOrThrow()

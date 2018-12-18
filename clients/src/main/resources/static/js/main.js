@@ -31,7 +31,16 @@ $(document).ready(function() {
     $("#movePopup").modal({show: false});
 
     signaturesConsole.change(function() {
-        $("#movePopupText").html($(this).val());
+        var text;
+
+        try {
+            var obj = JSON.parse($(this).val());
+            text = JSON.stringify(obj, null, 2);
+        } catch(exception) {
+            text = $(this).val();
+        }
+
+        $("#movePopupText").html(text);
         $("#movePopup").modal('show');
     });
 
@@ -164,9 +173,9 @@ $(document).ready(function() {
         });
     }
 
-    var appendToSignaturesConsole = function(signature) {
+    var appendToSignaturesConsole = function(signature, value) {
         signaturesConsole.prepend($('<option>', {
-                        value: signature,
+                        value: value != null ? value : signature,
                         text: new Date().toUTCString() + " - " + signature
                     }));
     }
@@ -395,11 +404,14 @@ $(document).ready(function() {
             // Play the move
             var move = JSON.parse(signedGameMove.move);
 
+            // Update the previousSignature
+            this.previousSignature = signedGameMove.signature;
+
             game.move(move);
             board.move(move.from + "-" + move.to);
             board.position(game.fen());
 
-            appendToSignaturesConsole("Move [" + signedGameMove.index + "] " + signedGameMove.move + " signature: " + JSON.stringify(signedGameMove.signature));
+            appendToSignaturesConsole("Move [" + signedGameMove.index + "] " + JSON.stringify(signedGameMove), JSON.stringify(signedGameMove));
 
             // Check the board's winning state
             this.checkWinningState(false);
@@ -419,7 +431,11 @@ $(document).ready(function() {
                              "opponentX500Name": isOrganiser ? playerB_X500Name : playerA_X500Name,
                              "index": this.moveIndex,
                              "fen": fenString,
-                             "move": JSON.stringify(move) }
+                             "move": JSON.stringify(move)}
+
+            if (this.previousSignature != null) {
+                postData.previousSignature = this.previousSignature;
+            }
 
             $.ajax({
                 url: signGameMove,
@@ -430,10 +446,13 @@ $(document).ready(function() {
                 success: function(data) {
                     console.log(data);
 
-                    thisGame.previousSignature = data.signature
+                    // Update with the signature which just got
+                    postData.signature = data.signature;
+
+                    thisGame.previousSignature = data.signature;
 
                     // write to console
-                    appendToSignaturesConsole("Move [" + thisGame.moveIndex + "] " + JSON.stringify(move) + " signature: " + JSON.stringify(data.signature));
+                    appendToSignaturesConsole("Move [" + thisGame.moveIndex + "] " + JSON.stringify(postData), JSON.stringify(postData));
 
                     printUserMessage(USER_MESSAGE_STATE_OPPONENT_TURN);
 
